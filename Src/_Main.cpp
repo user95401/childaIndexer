@@ -6,9 +6,61 @@ using namespace gd;
 
 HWND hWnd;
 
+bool bEnabled = true;
+
+DWORD WINAPI EnableThread(void* hModule);
+DWORD WINAPI DisableThread(void* hModule);
+FLAlertLayer* lastAlert;
+
+DWORD WINAPI EnableThread(void* hModule) {
+    while (true) {
+        if (GetKeyState(VK_F1) & 0x8000) {
+            bEnabled = true;
+            CreateThread(0, 0, DisableThread, hModule, 0, 0);
+            return 0;
+        }
+    }
+    return 0;
+}
+
+DWORD WINAPI DisableThread(void* hModule) {
+    while (true) {
+        if (GetKeyState(VK_F1) & 0x8000) {
+            bEnabled = false;
+            CreateThread(0, 0, EnableThread, hModule, 0, 0);
+            return 0;
+        }
+    }
+    return 0;
+}
+
+
 struct markChildrensWithIndex : public CCNode {
     void doit(float) {
-        ModUtils::markChildrensWithIndex(this);
+
+        if (bEnabled) {
+            ModUtils::markChildrensWithIndex(this);
+            //was disabled label
+            this->removeChildByTag(9540);
+            //info
+            this->removeChildByTag(5410);
+            this->addChild(CCLabelTTF::create(
+                "u can toggle childaIndexer with F1",
+                "Comic Sans MS", 5.f,
+                { CCDirector::sharedDirector()->getWinSize().width * 1.99f, 20 }, CCTextAlignment::kCCTextAlignmentRight
+            ), 999, 5410);
+            this->getChildByTag(5410)->runAction(CCEaseExponentialIn::create(CCFadeOut::create(5.f)));
+        }
+
+        else if (this->getChildByTag(5920) && !this->getChildByTag(9540)) {
+            this->addChild(CCLabelTTF::create(
+                "childaIndexer was disabled!\n(reopen that scene to take effect)",
+                "Comic Sans MS", 12.f,
+                { CCDirector::sharedDirector()->getWinSize().width * 1.9f, 100 }, CCTextAlignment::kCCTextAlignmentRight
+            ), 999, 9540);
+            this->getChildByTag(9540)->runAction(CCEaseExponentialIn::create(CCFadeOut::create(8.f)));
+        }
+
     }
 };
 
@@ -42,5 +94,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     if (ul_reason_for_call != DLL_PROCESS_ATTACH) return TRUE;
     hWnd = GetForegroundWindow();//сatch the game window right on launch (maybe on launch) hehe
     CreateThread(0, 0, ModThread, hModule, 0, 0);
+    CreateThread(0, 0, DisableThread, hModule, 0, 0);
     return TRUE;
 }
