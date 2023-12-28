@@ -6,9 +6,9 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /MANIFEST:NO")
 set(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_LIST_DIR}")
 cmake_policy(SET CMP0057 NEW)
 
-project ("mod")
+project ("childaIndexer")
 set(developer "user95401")
-set(description "mod made for gd 2.2!!! asd")
+set(description "gd 2.2 mod, show u child indexes of every scene and node")
 set(lib_output "D:/Games/user666/2.2 PC GDPS but actually that is lol/fif issue/") # post build copy
 
 #curly-eureka
@@ -23,7 +23,6 @@ configure_file("Version.rc" "../../../src/Version.rc")
 #mod
 file(GLOB_RECURSE SRC
 Src/*
-Src/Layers/*
 #${CURLY_EUREKA_DIR} to include other stuff
 )
 add_library(${PROJECT_NAME} SHARED ${SRC} ${CURLY_EUREKA_SRC})

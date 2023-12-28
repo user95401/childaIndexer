@@ -4,9 +4,27 @@ using namespace cocos2d;
 using namespace cocos2d::extension;
 using namespace gd;
 
-#include "Layers/CocosHeadersOnlyHookExample.hpp"
-
 HWND hWnd;
+
+struct markChildrensWithIndex : public CCNode {
+    void doit(float) {
+        ModUtils::markChildrensWithIndex(this);
+    }
+};
+
+inline CCLayer* (__cdecl* CCLayer_create)();
+CCLayer* CCLayer_create_H() {
+    CCLayer* pCCLayer = CCLayer_create();
+    pCCLayer->schedule(schedule_selector(markChildrensWithIndex::doit), 0.1f);
+    return pCCLayer;
+}
+
+inline CCScene* (__cdecl* CCScene_create)();
+CCScene* CCScene_create_H() {
+    CCScene* pCCScene = CCScene_create();
+    pCCScene->schedule(schedule_selector(markChildrensWithIndex::doit), 0.1f);
+    return pCCScene;
+}
 
 DWORD WINAPI ModThread(void* hModule) {
     //game ver check
@@ -15,11 +33,8 @@ DWORD WINAPI ModThread(void* hModule) {
             return 1;
     //othher stuff
     MH_Initialize();
-    MenuLayerSkit::CreateHooks();
-    SetWindowTextA(hWnd, (
-        "Geometry Das.. h: Modded by " + 
-        ModUtils::GetModDev()
-        ).c_str());
+    CC_HOOK("?create@CCLayer@cocos2d@@SAPAV12@XZ", CCLayer_create);
+    CC_HOOK("?create@CCScene@cocos2d@@SAPAV12@XZ", CCScene_create);
     return 0;
 }
 
